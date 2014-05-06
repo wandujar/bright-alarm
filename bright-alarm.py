@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 from urllib import urlopen
+import urllib
+import pygame
 import webbrowser
 import datetime
 import time
@@ -43,4 +45,15 @@ def news_sport_podcast():
 media0 = meteo_podcast_rtl()
 media1 = news_sport_podcast()
 media2 = news_podcast_france_bleu()
-call("cvlc --volume 1024 " + media0 + " " + media1 + " " + media2, shell=True)
+
+urllib.urlretrieve(media0,'files/temp.mp3') 
+
+pygame.init()
+pygame.mixer.init()
+pygame.mixer.music.load('files/wake_me_up.mp3')
+pygame.mixer.music.play()
+while pygame.mixer.music.get_busy(): 
+    pygame.time.Clock().tick(10)
+#call("cvlc --volume 1024 " + media0 + " " + media1 + " " + media2, shell=True)
+pygame.quit ()
+
