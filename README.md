@@ -8,3 +8,4 @@ This project is originally developped for raspberry pi on Raspbian OS.
 
 Dependancies:
 sudo apt-get install python-pygame
+sudo apt-get install python-feedparser

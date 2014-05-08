@@ -63,26 +63,47 @@ def internet_connection():
          sys.exit()
       return False
 
-internet_connection = internet_connection()
-if(internet_connection):
-   media0 = meteo_podcast_rtl()
-   media1 = news_sport_podcast()
-   media2 = news_podcast_france_bleu()
-   print "Downloading..."
-   urllib.urlretrieve(media0,'files/temp.mp3') 
-   print "Data downloaded"
+def play(media):
+   pause = 0
+   pygame.mixer.music.load(media)
+   print "Playing audio..."
+   pygame.mixer.music.play()
+   print "Press space bar to pause or unpause"
+   is_playing = 1
+   while (is_playing == 1):
+      pygame.time.Clock().tick(10)
+      key = raw_input()
+      if(key == " " and pause == 0):
+         pause = 1
+         pygame.mixer.music.pause()
+         print "Paused"
+      elif(key == " " and pause == 1):
+         pause = 0
+         pygame.mixer.music.unpause()
+         print "Unpaused"
+      is_playing = pygame.mixer.music.get_busy()
+   return
 
-print ""
+def retrieve_data():
+   internet_connection = internet_connection()
+   if(internet_connection):
+      media0 = meteo_podcast_rtl()
+      media1 = news_sport_podcast()
+      media2 = news_podcast_france_bleu()
+      print "Downloading..."
+      urllib.urlretrieve(media0,'files/media0.mp3') 
+      urllib.urlretrieve(media1,'files/media1.mp3') 
+      urllib.urlretrieve(media2,'files/media2.mp3') 
+      print "Data downloaded"
+
 print "Initialising player..."
 pygame.init()
-pygame.mixer.init()
 print "Player launched"
-pygame.mixer.music.load('files/wake_me_up.mp3')
-print "Playing audio..."
-pygame.mixer.music.play()
-while pygame.mixer.music.get_busy(): 
-    pygame.time.Clock().tick(10)
-print "Execution terminated"
-#call("cvlc --volume 1024 " + media0 + " " + media1 + " " + media2, shell=True)
-pygame.quit ()
+pygame.mixer.init() 
+play("files/wake_me_up.mp3")
+play("files/media0.mp3")
+play("files/media1.mp3")
+play("files/media2.mp3")
 
+print "Execution terminated"
+pygame.quit ()
