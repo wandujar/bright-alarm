@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 from urllib import urlopen
+from threading import Timer
+import curses
 import urllib
 import pygame
 import webbrowser
@@ -11,7 +13,8 @@ import sys
 from subprocess import call
 
 def meteo_podcast_rtl():
-   print "Retrieving podcast url..."
+   screen.addstr("Retrieving podcast url...\n")
+   screen.refresh()
    url = "http://www.rtl.fr/meteo.rss"
    raw = urlopen(url).read()
    begin = raw.find('type="audio/mpeg"')
@@ -19,7 +22,8 @@ def meteo_podcast_rtl():
    return address
 
 def news_podcast_france_culture():
-   print "Retrieving podcast url..."
+   screen.addstr("Retrieving podcast url...\n")
+   screen.refresh()
    base_url = "http://www.franceculture.fr/emission-le-5-a-7-le-5-a-7-"
    url = base_url + datetime.date.today().strftime("%Y") + "-" + datetime.date.today().strftime("%m") + "-" + datetime.date.today().strftime("%d")
    raw = urlopen(url).read()
@@ -30,7 +34,8 @@ def news_podcast_france_culture():
    return
 
 def news_podcast_france_bleu():
-   print "Retrieving podcast url..."
+   screen.addstr("Retrieving podcast url...\n")
+   screen.refresh()
    raw_url = "http://www.francebleu.fr/rss/emission/779636.rss"
    feed = feedparser.parse( raw_url )
    url =  feed[ "items" ][0][ "link" ]
@@ -41,7 +46,8 @@ def news_podcast_france_bleu():
    return address
 
 def news_sport_podcast():
-   print "Retrieving podcast url..."
+   screen.addstr("Retrieving podcast url...\n")
+   screen.refresh()
    url = "http://www.rtl.fr/emission/le-journal-des-sports/ecouter.rss"
    feed = feedparser.parse( url )
    media =  feed[ "items" ][0][ "link" ]
@@ -49,13 +55,16 @@ def news_sport_podcast():
 
 
 def internet_connection():
-   print "Checking Internet Connection..."
+   screen.addstr("Checking Internet Connection...\n")
+   screen.refresh()
    try:
       response=urllib.urlopen('http://google.fr')
-      print "Ok"
+      screen.addstr("Ok\n")
+      screen.refresh()
       return True
    except:
-      print "No Internet connection"
+      screen.addstr("No Internet connection\n")
+      screen.refresh()
       answer = raw_input("Do you want to continue ? (Y/n)")       
       if(answer == "Y" or answer == ""):
          pass
@@ -66,44 +75,71 @@ def internet_connection():
 def play(media):
    pause = 0
    pygame.mixer.music.load(media)
-   print "Playing audio..."
+   screen.addstr("Playing audio...\n")
+   screen.refresh()
    pygame.mixer.music.play()
-   print "Press space bar to pause or unpause"
-   is_playing = 1
-   while (is_playing == 1):
+   screen.addstr("Press space bar to pause or unpause\n")
+   screen.refresh()
+   is_playing = pygame.mixer.music.get_busy()
+   while (is_playing):
+      is_playing = pygame.mixer.music.get_busy()
       pygame.time.Clock().tick(10)
-      key = raw_input()
-      if(key == " " and pause == 0):
+      screen.timeout(1)
+      event = screen.getch()
+      if event == ord(" ") and pause == 0:
          pause = 1
          pygame.mixer.music.pause()
-         print "Paused"
-      elif(key == " " and pause == 1):
+         screen.addstr("Paused\n")     
+      elif event == ord(" ") and pause == 1:
          pause = 0
          pygame.mixer.music.unpause()
-         print "Unpaused"
-      is_playing = pygame.mixer.music.get_busy()
+         screen.addstr("Unpaused\n")   
+      elif event == curses.KEY_LEFT:
+         screen.addstr("Playing again from start\n")
+         play(media)            
+      elif event == curses.KEY_RIGHT:
+         screen.addstr("Skipping\n")
+         is_playing = 0
+      elif event == curses.KEY_BACKSPACE:
+         pygame.quit ()
+         curses.endwin()
+         sys.exit()
    return
 
+
 def retrieve_data():
-   internet_connection = internet_connection()
-   if(internet_connection):
+   internet_connection_var = internet_connection()
+   if(internet_connection_var):
       media0 = meteo_podcast_rtl()
       media1 = news_sport_podcast()
       media2 = news_podcast_france_bleu()
-      print "Downloading..."
+      screen.addstr("Downloading...\n")
+      screen.refresh()
       urllib.urlretrieve(media0,'files/media0.mp3') 
       urllib.urlretrieve(media1,'files/media1.mp3') 
       urllib.urlretrieve(media2,'files/media2.mp3') 
-      print "Data downloaded"
-
-print "Initialising player..."
+      screen.addstr("Data downloaded\n\n")
+      screen.refresh()
+   
+screen = curses.initscr()
+curses.noecho()
+curses.curs_set(0)
+screen.keypad(1)
+screen.addstr("Executing bright-alarm script...\n\n") 
+screen.refresh()
+retrieve_data()
+screen.addstr("Initialising player...\n")
+screen.refresh()
 pygame.init()
-print "Player launched"
+screen.addstr("Player launched\n\n")
+screen.refresh()
 pygame.mixer.init() 
 play("files/wake_me_up.mp3")
 play("files/media0.mp3")
 play("files/media1.mp3")
 play("files/media2.mp3")
 
-print "Execution terminated"
+screen.addstr("Execution terminated\n")
+screen.refresh()
 pygame.quit ()
+curses.endwin()
