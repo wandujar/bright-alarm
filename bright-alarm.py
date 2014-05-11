@@ -120,6 +120,49 @@ def retrieve_data():
       urllib.urlretrieve(media2,'files/media2.mp3') 
       screen.addstr("Data downloaded\n\n")
       screen.refresh()
+
+def synchronisation_seconds():
+    "Wait for the seconds to be at 00"
+    second = int(time.strftime("%S",time.localtime()))
+    if(second != 0):
+        time.sleep(60-second)
+    return
+
+def synchronisation_minutes():
+    "Wait for the minutes to be at 00"
+    minute = int(time.strftime("%M",time.localtime()))
+    if(minute != 0):
+        time.sleep((60-minute)*60)
+    return
+
+def wait(hour_defined, minute_defined):
+   "Wait for execution time defined by the user"
+   hour_defined = int(hour_defined)
+   minute_defined = int(minute_defined)
+   current_hour = int(time.strftime("%H",time.localtime()))
+   synchronisation_seconds()
+   
+   if(current_hour != hour_defined):
+       synchronisation_minutes()
+       hour_difference = hour_defined  - int(time.strftime("%H",time.localtime()))
+       if(hour_difference > 0):
+           print "let's sleep for %d hours !" %((hour_difference))
+           time.sleep((hour_difference)*60*60)
+       elif(hour_difference < 0):
+           hour_difference = hour_difference%24
+           print "let's sleep for %d hours !" %((hour_difference))
+           time.sleep((hour_difference)*60*60)
+   print "Less than an hour to sleep..."
+   while(int(time.strftime("%M",time.localtime())) != minute_defined):
+       time.sleep(59)
+   return
+
+alarm_time = raw_input("When do you plan to wake up ? (hh:mm)")
+if(alarm_time != ""):
+    print "Alarm will ring at %s" % alarm_time
+    alarm_minute = alarm_time[3:5]
+    alarm_hour = alarm_time[0:2]
+    wait(alarm_hour, alarm_minute);
    
 screen = curses.initscr()
 curses.noecho()
