@@ -40,8 +40,8 @@ def news_podcast_france_bleu():
    feed = feedparser.parse( raw_url )
    url =  feed[ "items" ][0][ "link" ]
    raw = urlopen(url).read()
-   begin = raw.find('urlAOD=')
-   address_key = raw[begin+7:begin+95]
+   begin = raw.find('<iframe src="/sites/all/modules/bleu/fb_player/templates/jplayer.php')
+   address_key = raw[begin+74 :begin+162]
    address = 'http://www.francebleu.fr/' + address_key
    return address
 
@@ -65,11 +65,6 @@ def internet_connection():
    except:
       screen.addstr("No Internet connection\n")
       screen.refresh()
-      answer = raw_input("Do you want to continue ? (Y/n)")       
-      if(answer == "Y" or answer == ""):
-         pass
-      else:
-         sys.exit()
       return False
 
 def play(media):
@@ -108,18 +103,16 @@ def play(media):
 
 
 def retrieve_data():
-   internet_connection_var = internet_connection()
-   if(internet_connection_var):
-      media0 = meteo_podcast_rtl()
-      media1 = news_sport_podcast()
-      media2 = news_podcast_france_bleu()
-      screen.addstr("Downloading...\n")
-      screen.refresh()
-      urllib.urlretrieve(media0,'files/media0.mp3') 
-      urllib.urlretrieve(media1,'files/media1.mp3') 
-      urllib.urlretrieve(media2,'files/media2.mp3') 
-      screen.addstr("Data downloaded\n\n")
-      screen.refresh()
+   media0 = meteo_podcast_rtl()
+   media1 = news_sport_podcast()
+   media2 = news_podcast_france_bleu()
+   screen.addstr("Downloading...\n")
+   screen.refresh()
+   urllib.urlretrieve(media0,'files/media0.mp3') 
+   urllib.urlretrieve(media1,'files/media1.mp3') 
+   urllib.urlretrieve(media2,'files/media2.mp3') 
+   screen.addstr("Data downloaded\n\n")
+   screen.refresh()
 
 def synchronisation_seconds():
     "Wait for the seconds to be at 00"
@@ -170,7 +163,9 @@ curses.curs_set(0)
 screen.keypad(1)
 screen.addstr("Executing bright-alarm script...\n\n") 
 screen.refresh()
-retrieve_data()
+internet = internet_connection()
+if(internet):
+   retrieve_data()
 screen.addstr("Initialising player...\n")
 screen.refresh()
 pygame.init()
@@ -178,10 +173,10 @@ screen.addstr("Player launched\n\n")
 screen.refresh()
 pygame.mixer.init() 
 play("files/wake_me_up.mp3")
-play("files/media0.mp3")
-play("files/media1.mp3")
-play("files/media2.mp3")
-
+if(internet):
+   play("files/media0.mp3")
+   play("files/media1.mp3")
+   play("files/media2.mp3")
 screen.addstr("Execution terminated\n")
 screen.refresh()
 pygame.quit ()
